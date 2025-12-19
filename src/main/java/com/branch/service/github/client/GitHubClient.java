@@ -5,9 +5,12 @@ import com.branch.service.github.model.github.UserResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
+
+import jakarta.annotation.PostConstruct;
 
 import java.util.List;
 
@@ -17,10 +20,13 @@ public class GitHubClient {
     // ******** Properties ********
     private static final Logger log = LoggerFactory.getLogger(GitHubClient.class);
     private static final String GITHUB_API_BASE_URL = "https://api.github.com";
-    private final RestClient restClient;
+    @Autowired
+    private RestClient.Builder restClientBuilder;
+    private RestClient restClient;
 
-    // ******** Constructors ********
-    public GitHubClient(RestClient.Builder restClientBuilder) {
+    // ******** Initialization ********
+    @PostConstruct
+    private void init() {
         this.restClient = restClientBuilder.baseUrl(GITHUB_API_BASE_URL).build();
     }
 

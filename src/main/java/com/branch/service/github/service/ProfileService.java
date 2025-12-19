@@ -6,6 +6,7 @@ import com.branch.service.github.model.github.RepoResponse;
 import com.branch.service.github.model.github.UserResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -16,35 +17,34 @@ import java.util.concurrent.CompletableFuture;
 public class ProfileService {
     // ******** Properties ********
     private static final Logger log = LoggerFactory.getLogger(ProfileService.class);
-    private final GitHubClient gitHubClient;
-
-    // ******** Constructor ********
-    public ProfileService(GitHubClient gitHubClient) {
-        this.gitHubClient = gitHubClient;
-    }
+    @Autowired
+    private GitHubClient gitHubClient;
 
     // ******** Domain methods ********
     public UserProfileResponse getUserProfile(String username) {
-        log.debug("Fetching profile data for username: {}", username);
-        // prepare to call both endpoints asynchronously
+        log.debug("Fetching profile data for username [{}]", username);
+
+        // prepare to call both GitHub endpoints asynchronously
         CompletableFuture<UserResponse> userInfoFuture = CompletableFuture.supplyAsync(() -> gitHubClient.getUserInfo(username));
         CompletableFuture<List<RepoResponse>> reposFuture = CompletableFuture.supplyAsync(() -> gitHubClient.getUserRepos(username));
 
         try {
             // call both. only takes as long as the slowest response
             CompletableFuture.allOf(userInfoFuture, reposFuture).join();
+            // get responses
             UserResponse userInfo = userInfoFuture.join();
             List<RepoResponse> repos = reposFuture.join();
+            // aggregate
             return buildUserProfileResponse(userInfo, repos);
         } catch (Exception e) {
             // if any failure, see which future(s) failed for specific error logging
             if (userInfoFuture.isCompletedExceptionally()) {
-                log.error("User info fetch failed for: {}", username, e);
+                log.error("User info fetch failed for user [{}]", username, e);
             }
             if (reposFuture.isCompletedExceptionally()) {
-                log.error("Repos fetch failed for: {}", username, e);
+                log.error("Repos fetch failed for user [{}]", username, e);
             }
-            throw new RuntimeException("Failed to fetch GitHub profile for user: " + username, e);
+            throw new RuntimeException("Failed to fetch GitHub profile for user [" + username + "]", e);
         }
     }
 
