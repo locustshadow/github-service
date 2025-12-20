@@ -2,15 +2,14 @@ package com.branch.service.github.client;
 
 import com.branch.service.github.model.github.RepoResponse;
 import com.branch.service.github.model.github.UserResponse;
+import jakarta.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientException;
-
-import jakarta.annotation.PostConstruct;
 
 import java.util.List;
 
@@ -20,9 +19,10 @@ public class GitHubClient {
     // ******** Properties ********
     private static final Logger log = LoggerFactory.getLogger(GitHubClient.class);
     private static final String GITHUB_API_BASE_URL = "https://api.github.com";
+    private RestClient restClient;
+    // -- resources --
     @Autowired
     private RestClient.Builder restClientBuilder;
-    private RestClient restClient;
 
     // ******** Initialization ********
     @PostConstruct
@@ -44,7 +44,7 @@ public class GitHubClient {
     public List<RepoResponse> getUserRepos(String username) {
         log.debug("Calling GitHub API for user repos: {}", username);
         try {
-            return restClient.get().uri("/users/{username}/repos", username).retrieve().body(new ParameterizedTypeReference<List<RepoResponse>>() {});
+            return restClient.get().uri("/users/{username}/repos", username).retrieve().body(new ParameterizedTypeReference<>() {});
         } catch (RestClientException e) {
             log.error("Error fetching repos for: {}", username, e);
             throw new RuntimeException("Failed to fetch repos from GitHub", e);

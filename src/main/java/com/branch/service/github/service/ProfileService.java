@@ -17,6 +17,7 @@ import java.util.concurrent.CompletableFuture;
 public class ProfileService {
     // ******** Properties ********
     private static final Logger log = LoggerFactory.getLogger(ProfileService.class);
+    // -- resources --
     @Autowired
     private GitHubClient gitHubClient;
 

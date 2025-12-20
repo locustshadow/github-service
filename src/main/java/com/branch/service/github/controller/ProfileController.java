@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ProfileController {
     // ******** Properties ********
     private static final Logger log = LoggerFactory.getLogger(ProfileController.class);
+    // -- resources --
     @Autowired
     private ProfileService profileService;
 
