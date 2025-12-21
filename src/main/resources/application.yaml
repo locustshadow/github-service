@@ -5,3 +5,7 @@ spring:
 github:
   api:
     base-url: https://api.github.com
+
+logging:
+    level:
+      com.branch.service.github: INFO
