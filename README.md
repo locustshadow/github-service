@@ -3,13 +3,37 @@
 A Spring Boot REST service that aggregates GitHub user profile data from multiple GitHub API endpoints into a unified response.
 
 ## Tech Stack
-
 - Java 25
 - Spring Boot 4.0.1
 - Spring RestClient
-- Lombok
+- Lombok (minimize boilerplate)
 - springdoc-openapi (Swagger)
 - JUnit 6 / Mockito (testing)
+
+## Architecture
+This project uses the following class structure:
+```
+ProfileController (REST API)
+    └── ProfileService (Business Logic)
+            └── GitHubClient (GitHub API Integration)
+```
+
+The profile service will fetch user info and a list of user repositories concurrently from GitHub (using `CompletableFuture` to minimize wait time), then aggregates them into a single response.
+
+## Project Structure
+
+```
+src/main/java/com/branch/service/github/
+├── client/           # External API clients (GitHub client)
+├── controller/       # REST controllers
+│   └── advice/       # Controller advice (i.e - exception handling)
+├── exception/        # Custom exception classes
+├── model/
+│   ├── dto/          # Response DTOs for this service's API
+│   └── github/       # DTOs mapping GitHub API responses
+└── service/          # Business logic
+```
+
 
 ## Build & Run
 
@@ -32,7 +56,7 @@ Open the project and run the `Application` class directly (click the play button
 
 ---
 
-The service starts on `http://localhost:8080`
+**NOTE**: The service starts on port `8080` (i.e. `http://localhost:8080`)
 
 ## API
 
@@ -44,7 +68,7 @@ Fetches GitHub user info and repositories.
 GET /api/v1/users/{username}/profile
 ```
 
-**Response (200 OK):**
+**Example Response (200 OK):**
 ```json
 {
   "user_name": "octocat",
@@ -64,7 +88,7 @@ GET /api/v1/users/{username}/profile
 }
 ```
 
-**Error Responses:**
+**Possible Error Responses:**
 
 | Status | Description |
 |--------|-------------|
@@ -74,7 +98,7 @@ GET /api/v1/users/{username}/profile
 
 ## API Documentation
 
-Once the application is running:
+Once the application is running, you can view the Swagger docs here:
 
 - Swagger UI: http://localhost:8080/swagger-ui.html
 - OpenAPI spec: http://localhost:8080/v3/api-docs
@@ -112,26 +136,3 @@ Right-click on a test class or method and select "Run", or click the play button
 | `ProfileControllerTest` | Controller | `@WebMvcTest` + `@MockitoBean` |
 | `ProfileServiceTest`    | Service | `@ExtendWith(MockitoExtension.class)` + `@Mock` |
 
-## Architecture
-
-```
-ProfileController (REST API)
-    └── ProfileService (Business Logic)
-            └── GitHubClient (GitHub API Integration)
-```
-
-The service fetches user info and repositories concurrently using `CompletableFuture`, then aggregates them into a single response.
-
-## Project Structure
-
-```
-src/main/java/com/branch/service/github/
-├── client/           # External API clients (GitHub client)
-├── controller/       # REST controllers
-│   └── advice/       # Controller advice (i.e - exception handling)
-├── exception/        # Custom exception classes
-├── model/
-│   ├── dto/          # Response DTOs for this service's API
-│   └── github/       # DTOs mapping GitHub API responses
-└── service/          # Business logic
-```
