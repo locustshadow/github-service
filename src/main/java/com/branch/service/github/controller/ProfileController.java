@@ -24,8 +24,8 @@ public class ProfileController {
     // ******** Domain methods ********
     @GetMapping("/users/{username}/profile")
     public ResponseEntity<UserProfileResponse> getUserProfile(@PathVariable String username) {
-        // TODO: what happens if there is an exception?  How does this handle it?  It seems to only handle Happy Path.
-        log.info("Received request for user profile: {}", username);
+        // NOTE: could change the logging to debug level if we don't want this filling up the logs
+        log.info("Received request for profile for user [{}]", username);
         UserProfileResponse profile = profileService.getUserProfile(username);
         log.info("Successfully retrieved profile for user: {}", username);
         return ResponseEntity.ok(profile);
