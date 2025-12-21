@@ -31,12 +31,12 @@ public class ProfileService {
     public UserProfileResponse getUserProfile(String username) {
         log.debug("fetching profile data for user [{}]", username);
 
-        // prepare to call both GitHub endpoints asynchronously
+        // call both GitHub endpoints asynchronously
         CompletableFuture<UserResponse> userInfoFuture = CompletableFuture.supplyAsync(() -> gitHubClient.getUserInfo(username));
         CompletableFuture<List<RepoResponse>> reposFuture = CompletableFuture.supplyAsync(() -> gitHubClient.getUserRepos(username));
 
         try {
-            // call both. only takes as long as the slowest response
+            // wait for both to finish (only takes as long as the slowest response)
             CompletableFuture.allOf(userInfoFuture, reposFuture).join();
             // get responses
             UserResponse userInfo = userInfoFuture.join();
