@@ -1,16 +1,20 @@
 package com.branch.service.github.service;
 
 import com.branch.service.github.client.GitHubClient;
+import com.branch.service.github.exception.GitHubApiException;
+import com.branch.service.github.exception.UserNotFoundException;
 import com.branch.service.github.model.dto.UserProfileResponse;
 import com.branch.service.github.model.github.RepoResponse;
 import com.branch.service.github.model.github.UserResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+// import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 
 
 @Service
@@ -22,8 +26,10 @@ public class ProfileService {
     private GitHubClient gitHubClient;
 
     // ******** Domain methods ********
+    // NOTE: if this got a lot of traffic, and we knew the data didn't change often, we could add caching here
+    // @Cacheable(value = "userProfiles", key = "#username") // TTL configured via cache provider (e.g., Caffeine: expireAfterWrite=60s)
     public UserProfileResponse getUserProfile(String username) {
-        log.debug("Fetching profile data for username [{}]", username);
+        log.debug("fetching profile data for user [{}]", username);
 
         // prepare to call both GitHub endpoints asynchronously
         CompletableFuture<UserResponse> userInfoFuture = CompletableFuture.supplyAsync(() -> gitHubClient.getUserInfo(username));
@@ -35,17 +41,19 @@ public class ProfileService {
             // get responses
             UserResponse userInfo = userInfoFuture.join();
             List<RepoResponse> repos = reposFuture.join();
-            // aggregate
+            // aggregate results
             return buildUserProfileResponse(userInfo, repos);
-        } catch (Exception e) {
-            // if any failure, see which future(s) failed for specific error logging
-            if (userInfoFuture.isCompletedExceptionally()) {
-                log.error("User info fetch failed for user [{}]", username, e);
+        } catch (CompletionException e) {
+            // handle various causes so all errors aren't just 500
+            Throwable cause = e.getCause();
+            if (cause instanceof UserNotFoundException) {
+                throw (UserNotFoundException) cause;
             }
-            if (reposFuture.isCompletedExceptionally()) {
-                log.error("Repos fetch failed for user [{}]", username, e);
+            if (cause instanceof GitHubApiException) {
+                throw (GitHubApiException) cause;
             }
-            throw new RuntimeException("Failed to fetch GitHub profile for user [" + username + "]", e);
+            log.error("failed to fetch GitHub profile for user [{}]", username, e);
+            throw new GitHubApiException("failed to fetch GitHub profile for user [" + username + "]", cause);
         }
     }
 
@@ -73,8 +81,8 @@ public class ProfileService {
             // convert to RFC 1123 (i.e. - "Tue, 25 Jan 2011 18:44:36 GMT")
             return java.time.format.DateTimeFormatter.RFC_1123_DATE_TIME.withZone(java.time.ZoneId.of("GMT")).format(instant);
         } catch (Exception e) {
-            log.error("Error converting date format: {}", iso8601Date, e);
-            return iso8601Date; // Return original if conversion fails
+            log.error("unable to convert date string [{}] to RFC 1123 format", iso8601Date, e);
+            return iso8601Date;
         }
     }
 }

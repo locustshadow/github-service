@@ -21,7 +21,7 @@ public class UserProfileResponse {
     private String email;
     private String url;
     @JsonProperty("created_at")
-    private String createdAt;  // RFC 1123 format
+    private String createdAt;
     private List<RepoInfo> repos;
 
     // ******** Synthetic properties ********
