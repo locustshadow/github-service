@@ -10,8 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,13 +19,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
+@Slf4j
 @Tag(name = "Profile", description = "GitHub user profile operations")
 @RestController
 @RequestMapping("/api/v1")
 public class ProfileController {
-    // ******** Properties ********
-    private static final Logger log = LoggerFactory.getLogger(ProfileController.class);
-    // -- resources --
+    // ******** Resources ********
     @Autowired
     private ProfileService profileService;
 

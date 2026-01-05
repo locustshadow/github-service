@@ -5,8 +5,7 @@ import com.branch.service.github.exception.UserNotFoundException;
 import com.branch.service.github.model.github.RepoResponse;
 import com.branch.service.github.model.github.UserResponse;
 import jakarta.annotation.PostConstruct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -18,10 +17,10 @@ import org.springframework.web.client.RestClientException;
 import java.util.List;
 
 
+@Slf4j
 @Component
 public class GitHubClient {
     // ******** Properties ********
-    private static final Logger log = LoggerFactory.getLogger(GitHubClient.class);
     private RestClient restClient;
     @Value("${github.api.base-url}")
     private String baseUrl;
