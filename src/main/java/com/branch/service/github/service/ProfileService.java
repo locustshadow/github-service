@@ -6,8 +6,7 @@ import com.branch.service.github.exception.UserNotFoundException;
 import com.branch.service.github.model.dto.UserProfileResponse;
 import com.branch.service.github.model.github.RepoResponse;
 import com.branch.service.github.model.github.UserResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 // import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -17,11 +16,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 
 
+@Slf4j
 @Service
 public class ProfileService {
-    // ******** Properties ********
-    private static final Logger log = LoggerFactory.getLogger(ProfileService.class);
-    // -- resources --
+    // ******** Resources ********
     @Autowired
     private GitHubClient gitHubClient;
 
